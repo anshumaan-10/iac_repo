@@ -20,6 +20,12 @@ jobs:
       run:
         shell: bash
         working-directory: ./terraform
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+      BUCKET_TF: ${{ secrets.BUCKET_TF }}
+
     steps:
     - name: Checkout source code 
       uses: actions/checkout@v4
@@ -27,18 +33,9 @@ jobs:
     - name: Setup Terraform with specified version on the runner
       uses: hashicorp/setup-terraform@v3
 
-    - name: Export AWS Credentials
-      run: |
-        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-        echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
-
-    - name: Export S3 Bucket Environment Variable
-      run: echo "BUCKET_TF=${{ secrets.BUCKET_TF }}" >> $GITHUB_ENV
-
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config="bucket=${{ env.BUCKET_TF }}"
+      run: terraform init -backend-config="bucket=${BUCKET_TF}"
 
     - name: Terraform Format
       id: fmt
